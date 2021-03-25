@@ -1,0 +1,134 @@
+---
+title: "q8"
+author: "Rathana San"
+date: "3/23/2020"
+output: html_document
+---
+
+```{r}
+#### Table 15.2
+
+q8<- read.csv("C:/Users/User/OneDrive/Desktop/MSBA 2019-2020/MSBA Wi20/TBANLT 560/DMBA-R-datasets/q8.csv",header=TRUE)
+
+# set row names to the utilities column
+row.names(q8) <- q8[,1]
+
+# remove the utility column
+q8 <- q8[,-1]
+
+# compute Euclidean distance
+# (to compute other distance measures, change the value in method = )
+d <- dist(q8, method = "euclidean")
+d.norm <- dist(q8[,c(1,4)], method = "euclidean")
+```
+
+```{r}
+#### Table 15.4
+
+# normalize input variables
+q8.norm <- sapply(q8, scale)
+
+# add row names: utilities
+row.names(q8.norm) <- row.names(q8) 
+
+# compute normalized distance based on variables Sales and FuelCost
+d.norm <- dist(q8.norm[,c(1,4)], method = "euclidean")
+```
+
+```{r}
+#### Figure 15.3
+# compute normalized distance based on all 4 variables
+d.norm <- dist(q8.norm, method = "euclidean")
+
+# in hclust() set argument method =  
+# to "ward.D", "single", "complete", "average", "median", or "centroid"
+hc1 <- hclust(d.norm, method = "single")
+plot(hc1, hang = -1, ann = FALSE)
+hc2 <- hclust(d.norm, method = "average")
+plot(hc2, hang = -1, ann = FALSE)
+
+```
+
+```{r}
+#### Table 15.6
+
+memb <- cutree(hc1, k = 6)
+memb
+memb <- cutree(hc2, k = 6)
+memb
+```
+
+```{r}
+#### Figure 15.4
+
+# set labels as cluster membership and utility name
+row.names(q8.norm) <- paste(memb, ": ", row.names(q8), sep = "")
+
+# plot heatmap 
+# rev() reverses the color mapping to large = dark
+heatmap(as.matrix(q8.norm), Colv = NA, hclustfun = hclust, 
+        col=rev(paste("gray",1:99,sep="")))
+
+
+
+
+```
+
+```{r}
+#### Table 15.9
+
+# load and preprocess data 
+q8<- read.csv("C:/Users/User/OneDrive/Desktop/MSBA 2019-2020/MSBA Wi20/TBANLT 560/DMBA-R-datasets/q8.csv",header=TRUE)
+row.names(q8) <- q8[,1]
+q8 <- q8[,-1]
+
+# normalized distance:
+q8.norm <- sapply(q8, scale)
+row.names(q8.norm) <- row.names(q8) 
+
+# run kmeans algorithm 
+set.seed(2)
+km <- kmeans(q8.norm, 6)
+
+# show cluster membership
+km$cluster
+
+
+```
+
+```{r}
+#### Table 15.10
+# centroids
+km$centers
+
+```
+
+
+
+```{r}
+#### Figure 15.5
+
+# plot an empty scatter plot
+plot(c(0), xaxt = 'n', ylab = "", type = "l", 
+     ylim = c(min(km$centers), max(km$centers)), xlim = c(0, 4))
+
+# label x-axes
+axis(1, at = c(1:4), labels = names(q8))
+
+# plot centroids
+for (i in c(1:3))
+  lines(km$centers[i,], lty = i, lwd = 2, col = ifelse(i %in% c(1, 2, 3),
+                                                       "black", "dark grey"))
+
+# name clusters
+text(x = 0.5, y = km$centers[, 1], labels = paste("Cluster", c(1:3)))
+
+
+```
+
+```{r}
+#### Table 15.11
+
+dist(km$centers)
+
+```
